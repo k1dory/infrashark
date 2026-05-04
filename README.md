@@ -11,7 +11,7 @@ Think of it as Miro / Figma for `docker-compose.yml`, Kubernetes manifests, Ngin
 ```bash
 npm install
 npm run dev
-# open http://localhost:5173 (or 3000 if started with --port 3000)
+# open http://localhost:5173 (or npm run dev -- --host 0.0.0.0)
 ```
 
 Then click **📂 Open** in the toolbar and load `example-architecture.json` from the project root to see a sample architecture (VPS → Nginx → Docker Compose stack with FastAPI, Next.js, PostgreSQL, Redis, RabbitMQ, Worker, Prometheus, Grafana, S3).
