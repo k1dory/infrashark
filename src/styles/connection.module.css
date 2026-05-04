@@ -1,0 +1,71 @@
+.connection {
+  fill: none;
+  stroke-width: 2.5;
+  transition: stroke var(--transition-fast), stroke-width var(--transition-fast);
+  cursor: pointer;
+  pointer-events: stroke;
+}
+
+.connection:hover {
+  stroke-width: 4;
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+.connection.selected {
+  stroke-width: 4;
+  filter: drop-shadow(0 0 10px currentColor);
+}
+
+.connectionHitArea {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 20;
+  cursor: pointer;
+  pointer-events: stroke;
+}
+
+.connectionDashed {
+  stroke-dasharray: 8 4;
+}
+
+.connectionFlow {
+  stroke-dasharray: 10 6;
+  animation: flowAnimation 1.2s linear infinite;
+}
+
+@keyframes flowAnimation {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -16; }
+}
+
+.arrowhead {
+  transition: fill var(--transition-fast);
+}
+
+.connectionLabel {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  pointer-events: none;
+  user-select: none;
+}
+
+.connectionLabelBg {
+  rx: 4;
+  ry: 4;
+}
+
+.tempConnection {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 2.5;
+  stroke-dasharray: 6 4;
+  opacity: 0.8;
+  pointer-events: none;
+  animation: flowAnimation 0.8s linear infinite;
+}
+
+.snapIndicator {
+  fill: var(--color-accent);
+  opacity: 0.3;
+}

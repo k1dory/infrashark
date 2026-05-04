@@ -1,0 +1,269 @@
+{
+  "version": "1.0",
+  "meta": {
+    "name": "Production Web App",
+    "description": "Типичная продакшн архитектура с Nginx, API, DB, Redis и мониторингом",
+    "author": "InfraShark",
+    "created": "2026-04-23T10:00:00.000Z",
+    "updated": "2026-04-23T10:00:00.000Z"
+  },
+  "components": [
+    {
+      "id": "vps-1",
+      "type": "vps",
+      "name": "Production VPS",
+      "parentId": null,
+      "position": { "x": 100, "y": 100 },
+      "size": { "width": 700, "height": 500 },
+      "config": {
+        "provider": "Hetzner",
+        "cpu": "4 vCPU",
+        "ram": "8 GB",
+        "disk": "80 GB NVMe",
+        "ip": "203.0.113.10"
+      },
+      "ports": []
+    },
+    {
+      "id": "nginx-1",
+      "type": "nginx",
+      "name": "Reverse Proxy",
+      "parentId": "vps-1",
+      "position": { "x": 30, "y": 60 },
+      "size": { "width": 200, "height": 90 },
+      "config": {
+        "ssl": true,
+        "http2": true,
+        "upstreams": ["api:8080", "web:3000"]
+      },
+      "ports": []
+    },
+    {
+      "id": "compose-1",
+      "type": "docker-compose",
+      "name": "App Stack",
+      "parentId": "vps-1",
+      "position": { "x": 260, "y": 40 },
+      "size": { "width": 410, "height": 440 },
+      "config": {
+        "file": "docker-compose.yml",
+        "network": "app_network"
+      },
+      "ports": []
+    },
+    {
+      "id": "api-1",
+      "type": "app",
+      "name": "API Server",
+      "parentId": "compose-1",
+      "position": { "x": 30, "y": 60 },
+      "size": { "width": 170, "height": 80 },
+      "config": {
+        "language": "Python",
+        "framework": "FastAPI",
+        "image": "python:3.12-slim"
+      },
+      "ports": []
+    },
+    {
+      "id": "web-1",
+      "type": "app",
+      "name": "Web Frontend",
+      "parentId": "compose-1",
+      "position": { "x": 220, "y": 60 },
+      "size": { "width": 170, "height": 80 },
+      "config": {
+        "framework": "Next.js",
+        "image": "node:20-alpine"
+      },
+      "ports": []
+    },
+    {
+      "id": "postgres-1",
+      "type": "postgresql",
+      "name": "Main Database",
+      "parentId": "compose-1",
+      "position": { "x": 30, "y": 170 },
+      "size": { "width": 170, "height": 80 },
+      "config": {
+        "version": "16",
+        "database": "production",
+        "volumes": ["pg_data:/var/lib/postgresql/data"]
+      },
+      "ports": []
+    },
+    {
+      "id": "redis-1",
+      "type": "redis",
+      "name": "Cache",
+      "parentId": "compose-1",
+      "position": { "x": 220, "y": 170 },
+      "size": { "width": 170, "height": 80 },
+      "config": {
+        "version": "7",
+        "maxmemory": "512mb",
+        "policy": "allkeys-lru"
+      },
+      "ports": []
+    },
+    {
+      "id": "rabbit-1",
+      "type": "rabbitmq",
+      "name": "Message Queue",
+      "parentId": "compose-1",
+      "position": { "x": 30, "y": 280 },
+      "size": { "width": 170, "height": 80 },
+      "config": {
+        "version": "3.12",
+        "queues": ["jobs", "emails", "notifications"]
+      },
+      "ports": []
+    },
+    {
+      "id": "worker-1",
+      "type": "app",
+      "name": "Background Worker",
+      "parentId": "compose-1",
+      "position": { "x": 220, "y": 280 },
+      "size": { "width": 170, "height": 80 },
+      "config": {
+        "language": "Python",
+        "framework": "Celery"
+      },
+      "ports": []
+    },
+    {
+      "id": "prometheus-1",
+      "type": "prometheus",
+      "name": "Metrics",
+      "parentId": "vps-1",
+      "position": { "x": 30, "y": 180 },
+      "size": { "width": 200, "height": 80 },
+      "config": {
+        "scrape_interval": "15s",
+        "retention": "30d"
+      },
+      "ports": []
+    },
+    {
+      "id": "grafana-1",
+      "type": "grafana",
+      "name": "Dashboards",
+      "parentId": "vps-1",
+      "position": { "x": 30, "y": 290 },
+      "size": { "width": 200, "height": 80 },
+      "config": {
+        "datasources": ["Prometheus"]
+      },
+      "ports": []
+    },
+    {
+      "id": "client-1",
+      "type": "custom",
+      "name": "Browser / Mobile",
+      "parentId": null,
+      "position": { "x": 900, "y": 180 },
+      "size": { "width": 180, "height": 90 },
+      "config": {
+        "description": "End users accessing the service"
+      },
+      "ports": [],
+      "style": {
+        "backgroundColor": "#2d3748",
+        "borderColor": "#4a5568"
+      }
+    },
+    {
+      "id": "s3-1",
+      "type": "s3-bucket",
+      "name": "Media Storage",
+      "parentId": null,
+      "position": { "x": 900, "y": 380 },
+      "size": { "width": 180, "height": 80 },
+      "config": {
+        "region": "eu-central-1",
+        "bucket": "app-media"
+      },
+      "ports": []
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-1",
+      "from": { "componentId": "client-1", "portId": "__anchor_left" },
+      "to": { "componentId": "nginx-1", "portId": "__anchor_top" },
+      "protocol": "HTTPS",
+      "label": "HTTPS :443"
+    },
+    {
+      "id": "conn-2",
+      "from": { "componentId": "nginx-1", "portId": "__anchor_right" },
+      "to": { "componentId": "api-1", "portId": "__anchor_left" },
+      "protocol": "HTTP",
+      "label": "HTTP :8080"
+    },
+    {
+      "id": "conn-3",
+      "from": { "componentId": "nginx-1", "portId": "__anchor_bottom" },
+      "to": { "componentId": "web-1", "portId": "__anchor_top" },
+      "protocol": "HTTP",
+      "label": "HTTP :3000"
+    },
+    {
+      "id": "conn-4",
+      "from": { "componentId": "api-1", "portId": "__anchor_bottom" },
+      "to": { "componentId": "postgres-1", "portId": "__anchor_top" },
+      "protocol": "PostgreSQL",
+      "label": "pg :5432"
+    },
+    {
+      "id": "conn-5",
+      "from": { "componentId": "api-1", "portId": "__anchor_right" },
+      "to": { "componentId": "redis-1", "portId": "__anchor_left" },
+      "protocol": "Redis",
+      "label": "redis :6379"
+    },
+    {
+      "id": "conn-6",
+      "from": { "componentId": "api-1", "portId": "__anchor_bottom" },
+      "to": { "componentId": "rabbit-1", "portId": "__anchor_top" },
+      "protocol": "AMQP",
+      "label": "AMQP :5672"
+    },
+    {
+      "id": "conn-7",
+      "from": { "componentId": "rabbit-1", "portId": "__anchor_right" },
+      "to": { "componentId": "worker-1", "portId": "__anchor_left" },
+      "protocol": "AMQP",
+      "label": "consume"
+    },
+    {
+      "id": "conn-8",
+      "from": { "componentId": "worker-1", "portId": "__anchor_top" },
+      "to": { "componentId": "postgres-1", "portId": "__anchor_right" },
+      "protocol": "PostgreSQL",
+      "label": "pg :5432"
+    },
+    {
+      "id": "conn-9",
+      "from": { "componentId": "api-1", "portId": "__anchor_top" },
+      "to": { "componentId": "prometheus-1", "portId": "__anchor_right" },
+      "protocol": "HTTP",
+      "label": "/metrics"
+    },
+    {
+      "id": "conn-10",
+      "from": { "componentId": "prometheus-1", "portId": "__anchor_bottom" },
+      "to": { "componentId": "grafana-1", "portId": "__anchor_top" },
+      "protocol": "HTTP",
+      "label": "query"
+    },
+    {
+      "id": "conn-11",
+      "from": { "componentId": "api-1", "portId": "__anchor_right" },
+      "to": { "componentId": "s3-1", "portId": "__anchor_left" },
+      "protocol": "HTTPS",
+      "label": "S3 API"
+    }
+  ]
+}
